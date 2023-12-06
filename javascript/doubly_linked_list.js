@@ -24,7 +24,7 @@ class DoublyLinkedList {
   // print each node's value on its own line
   // use your iterate method to be DRY! Don't get caught in the code rain, brrr.
   print() {
-    this.iterate(node => console.log(node.value));
+    this.iterate((node) => console.log(node.value));
   }
 
   // find the node with the target value and return it
@@ -32,7 +32,7 @@ class DoublyLinkedList {
   find(target) {
     let result = null;
 
-    this.iterate(node => {
+    this.iterate((node) => {
       if (node.value === target) {
         result = node;
 
@@ -45,7 +45,10 @@ class DoublyLinkedList {
 
   // add the node to the start of the list, no nodes should be removed
   addFirst(node) {
-    node.next = this.head;
+    if (this.head) {
+      node.next = this.head;
+      this.head.prev = node;
+    }
     this.head = node;
   }
 
@@ -57,9 +60,10 @@ class DoublyLinkedList {
       return;
     }
 
-    this.iterate(currNode => {
+    this.iterate((currNode) => {
       if (currNode.next === null) {
         currNode.next = node;
+        node.prev = currNode;
         return true;
       }
     });
@@ -72,6 +76,9 @@ class DoublyLinkedList {
 
     if (this.head !== null) {
       this.head = this.head.next;
+    }
+    if (this.head !== null) {
+      this.head.prev = null;
     }
 
     return oldHead;
@@ -86,7 +93,7 @@ class DoublyLinkedList {
 
     let oldTail = null;
 
-    this.iterate(node => {
+    this.iterate((node) => {
       if (node.next.next === null) {
         oldTail = node.next;
         node.next = null;
@@ -107,7 +114,11 @@ class DoublyLinkedList {
 
     this.iterate((currNode, count) => {
       if (count === idx - 1) {
-        node.next = currNode.next.next;
+        if (currNode.next.next) {
+          node.next = currNode.next.next;
+          currNode.next.next.prev = node;
+        }
+        node.prev = currNode;
         currNode.next = node;
 
         return true;
@@ -127,9 +138,10 @@ class DoublyLinkedList {
 
     this.iterate((currNode, count) => {
       if (count === idx - 1) {
-        const oldNext = currNode.next;
+        node.next = currNode.next;
+        if (node.next) node.next.prev = node;
+        node.prev = currNode;
         currNode.next = node;
-        node.next = oldNext;
 
         return true;
       }
@@ -144,14 +156,15 @@ class DoublyLinkedList {
 
     let oldNode = null;
 
-    this.iterate((node, count) => {
+    this.iterate((currNode, count) => {
       if (count === idx - 1) {
-        oldNode = node.next;
-        node.next = node.next.next;
+        oldNode = currNode.next;
+        currNode.next = oldNode.next;
+        if (oldNode.next) oldNode.next.prev = currNode;
 
         return true;
       }
-    }); 
+    });
 
     return oldNode;
   }
@@ -162,17 +175,18 @@ class DoublyLinkedList {
 }
 
 class Node {
-  constructor(value = null, next = null) {
+  constructor(value = null, next = null, prev = null) {
     this.value = value;
     this.next = next;
+    this.prev = null;
   }
 }
 
 if (require.main === module) {
   // add your own tests in here
-  
 }
 
 module.exports = {
-  Node, DoublyLinkedList
+  Node,
+  DoublyLinkedList,
 };
